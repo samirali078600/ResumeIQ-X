@@ -1,0 +1,43 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>ResumeIQ X — Your Career. Analyzed. Optimized. Elevated.</title>
+    <meta
+      name="description"
+      content="Complete browser-based resume intelligence platform. Parse PDF, DOCX, and TXT resumes locally, run hybrid NLP and transparent ATS scoring, match job descriptions, and build tailored resumes privately."
+    />
+    <meta property="og:title" content="ResumeIQ X — Browser-Based Resume Intelligence" />
+    <meta
+      property="og:description"
+      content="Your Career. Analyzed. Optimized. Elevated. Local document parsing, hybrid NLP, transparent ATS scoring, and resume builder."
+    />
+    <meta property="og:type" content="website" />
+    <meta name="twitter:card" content="summary_large_image" />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,400..700;1,9..40,400..600&family=JetBrains+Mono:wght@400;500;600&family=Plus+Jakarta+Sans:wght@500;600;700;800&display=swap"
+      rel="stylesheet"
+    />
+    <script>
+      (function () {
+        try {
+          var saved = localStorage.getItem('resumeiq_theme');
+          var prefersDark = window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches;
+          var isDark = saved === 'dark' || ((!saved || saved === 'system') && prefersDark);
+          if (isDark) {
+            document.documentElement.classList.add('dark');
+          } else {
+            document.documentElement.classList.remove('dark');
+          }
+        } catch (e) {}
+      })();
+    </script>
+  </head>
+  <body class="bg-slate-50 text-slate-900 dark:bg-[#060A13] dark:text-slate-100 antialiased selection:bg-indigo-500/20 selection:text-indigo-700 dark:selection:text-indigo-300">
+    <div id="root"></div>
+    <script type="module" src="/src/main.tsx"></script>
+  </body>
+</html>
