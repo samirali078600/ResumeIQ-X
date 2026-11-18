@@ -27,23 +27,63 @@ function ThreeDotQuickMenu() {
     };
   }, [open]);
 
-  const menuLinks = authSession
+  const menuSections = authSession
     ? [
-        { to: '/', label: 'Home' },
-        { to: '/workspace', label: 'Workspace Dashboard' },
-        { to: '/analyzer', label: 'Resume Analyzer' },
-        { to: '/job-matching', label: 'Job Matching' },
-        { to: '/resume-builder', label: 'Resume Builder' },
-        { to: '/about', label: 'About' },
-        { to: '/contact', label: 'Contact' },
+        {
+          heading: 'Core Workspace',
+          items: [
+            { to: '/', label: 'Home' },
+            { to: '/workspace', label: 'Workspace Dashboard' },
+            { to: '/analyzer', label: 'Resume Analyzer' },
+            { to: '/job-matching', label: 'Resume vs Job Match' },
+          ],
+        },
+        {
+          heading: 'Analysis & History',
+          items: [
+            { to: '/ats-intelligence', label: 'ATS Intelligence' },
+            { to: '/nlp-laboratory', label: 'NLP Laboratory' },
+            { to: '/skills-gap', label: 'Skills Gap' },
+            { to: '/career-intelligence', label: 'Career Intelligence' },
+            { to: '/resume-comparison', label: 'Compare Resumes' },
+            { to: '/analysis-history', label: 'Analysis History' },
+            { to: '/reports', label: 'Reports Center' },
+          ],
+        },
+        {
+          heading: 'Account & Info',
+          items: [
+            { to: '/profile', label: 'Local Profile' },
+            { to: '/settings', label: 'Settings' },
+            { to: '/about', label: 'About & Feature Guide' },
+            { to: '/contact', label: 'Contact' },
+          ],
+        },
       ]
     : [
-        { to: '/', label: 'Home' },
-        { to: '/analyzer', label: 'Analyzer (Login Required)' },
-        { to: '/about', label: 'About' },
-        { to: '/contact', label: 'Contact' },
-        { to: '/login', label: 'Login' },
-        { to: '/signup', label: 'Sign Up' },
+        {
+          heading: 'Navigation',
+          items: [
+            { to: '/', label: 'Home' },
+            { to: '/about', label: 'About & Feature Guide' },
+            { to: '/contact', label: 'Contact' },
+          ],
+        },
+        {
+          heading: 'Workspace Tools (Login Required)',
+          items: [
+            { to: '/analyzer', label: 'Resume Analyzer' },
+            { to: '/job-matching', label: 'Resume vs Job Match' },
+            { to: '/analysis-history', label: 'Analysis History' },
+          ],
+        },
+        {
+          heading: 'Account',
+          items: [
+            { to: '/login', label: 'Sign In' },
+            { to: '/signup', label: 'Get Started (Sign Up)' },
+          ],
+        },
       ];
 
   return (
@@ -53,7 +93,7 @@ function ThreeDotQuickMenu() {
         onClick={() => setOpen((v) => !v)}
         aria-label="Quick navigation menu"
         aria-expanded={open}
-        title="Quick menu"
+        title="Quick navigation menu"
         className="inline-flex h-10 w-10 items-center justify-center rounded-lg border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 text-slate-700 dark:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors focus-visible:outline-2 focus-visible:outline-indigo-600 shrink-0"
       >
         <MoreVertical className="h-4 w-4" />
@@ -62,18 +102,25 @@ function ThreeDotQuickMenu() {
       {open && (
         <div
           role="menu"
-          className="absolute right-0 mt-2 w-56 rounded-xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 shadow-xl py-1.5 z-50"
+          className="absolute right-0 mt-2 w-64 max-h-[80vh] overflow-y-auto rounded-xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 shadow-xl py-2 z-50 divide-y divide-slate-100 dark:divide-slate-800"
         >
-          {menuLinks.map((item) => (
-            <Link
-              key={item.to + item.label}
-              to={item.to}
-              role="menuitem"
-              onClick={() => setOpen(false)}
-              className="block px-4 py-2 text-xs font-medium text-slate-700 dark:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors"
-            >
-              {item.label}
-            </Link>
+          {menuSections.map((section) => (
+            <div key={section.heading} className="py-1.5 first:pt-0.5 last:pb-0.5">
+              <p className="px-4 py-1 text-[10px] font-semibold tracking-wider text-slate-400 dark:text-slate-500">
+                {section.heading}
+              </p>
+              {section.items.map((item) => (
+                <Link
+                  key={item.to + item.label}
+                  to={item.to}
+                  role="menuitem"
+                  onClick={() => setOpen(false)}
+                  className="block px-4 py-1.5 text-xs font-medium text-slate-700 dark:text-slate-200 hover:bg-indigo-50/70 dark:hover:bg-slate-800 hover:text-indigo-700 dark:hover:text-indigo-300 transition-colors"
+                >
+                  {item.label}
+                </Link>
+              ))}
+            </div>
           ))}
         </div>
       )}
@@ -104,22 +151,25 @@ export function LandingNavbar() {
 
   return (
     <header className="sticky top-0 z-40 border-b border-slate-200/80 dark:border-slate-800/80 bg-white/95 dark:bg-[#090F1E]/95 backdrop-blur-xs">
-      <div className="mx-auto flex h-16 max-w-7xl items-center justify-between gap-6 px-4 sm:px-6 lg:px-8">
+      <div className="mx-auto flex h-16 max-w-7xl items-center justify-between gap-4 px-4 sm:px-6 lg:px-8">
         {/* Zone 1: Brand Wordmark */}
         <Link
           to="/"
           className="font-display text-lg font-bold tracking-tight text-slate-900 dark:text-white whitespace-nowrap shrink-0"
         >
-          ResumeIQ X
+          ResumeIQ
         </Link>
 
-        {/* Zone 2: Primary Top Navigation Links (Home, Analyzer, About, Contact) */}
-        <nav aria-label="Primary navigation" className="hidden md:flex items-center gap-7 text-sm font-medium">
+        {/* Zone 2: Primary Top Navigation Links (Templates & Cover Letter removed) */}
+        <nav aria-label="Primary navigation" className="hidden lg:flex items-center gap-6 text-sm font-medium">
           <NavLink to="/" end className={navLinkClass}>
             Home
           </NavLink>
           <NavLink to="/analyzer" className={navLinkClass}>
-            Analyzer
+            Resume Analyzer
+          </NavLink>
+          <NavLink to="/job-matching" className={navLinkClass}>
+            Job Match
           </NavLink>
           <NavLink to="/about" className={navLinkClass}>
             About
@@ -129,7 +179,7 @@ export function LandingNavbar() {
           </NavLink>
         </nav>
 
-        {/* Zone 3: Auth Actions (Login / Sign Up or Workspace / Sign Out) + Theme Toggle + Three-Dot Menu */}
+        {/* Zone 3: Theme Toggle + Three-Dot Menu + Auth Actions */}
         <div className="flex items-center gap-2.5 shrink-0">
           <ThemeToggle compact />
           <ThreeDotQuickMenu />
@@ -142,10 +192,18 @@ export function LandingNavbar() {
               >
                 Workspace
               </Link>
+              <Link
+                to="/analyzer"
+                className="hidden sm:inline-flex items-center justify-center rounded-lg bg-indigo-600 hover:bg-indigo-700 px-4 py-2 text-sm font-semibold text-white transition-colors whitespace-nowrap shrink-0"
+              >
+                Analyze
+              </Link>
               <button
                 type="button"
                 onClick={handleSignOut}
-                className="hidden sm:inline-flex items-center gap-1.5 rounded-lg bg-indigo-600 hover:bg-indigo-700 px-4 py-2 text-sm font-medium text-white transition-colors whitespace-nowrap shrink-0"
+                title="Sign Out"
+                aria-label="Sign Out"
+                className="hidden xl:inline-flex items-center gap-1.5 rounded-lg border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 hover:bg-slate-50 dark:hover:bg-slate-800 px-3 py-2 text-xs font-medium text-slate-700 dark:text-slate-200 transition-colors whitespace-nowrap shrink-0"
               >
                 <LogOut className="h-3.5 w-3.5" />
                 <span>Sign Out</span>
@@ -155,15 +213,15 @@ export function LandingNavbar() {
             <>
               <Link
                 to="/login"
-                className="hidden sm:inline-flex items-center justify-center rounded-lg border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 hover:bg-slate-50 dark:hover:bg-slate-800 px-4 py-2 text-sm font-medium text-slate-800 dark:text-slate-200 transition-colors whitespace-nowrap shrink-0"
+                className="hidden sm:inline-flex items-center justify-center rounded-lg border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 hover:bg-slate-50 dark:hover:bg-slate-800 px-3.5 py-2 text-sm font-medium text-slate-800 dark:text-slate-200 transition-colors whitespace-nowrap shrink-0"
               >
-                Login
+                Sign In
               </Link>
               <Link
                 to="/signup"
                 className="hidden sm:inline-flex items-center justify-center rounded-lg bg-indigo-600 hover:bg-indigo-700 px-4 py-2 text-sm font-semibold text-white transition-colors whitespace-nowrap shrink-0"
               >
-                Sign Up
+                Get Started
               </Link>
             </>
           )}
@@ -172,44 +230,58 @@ export function LandingNavbar() {
             type="button"
             onClick={() => setMobileMenuOpen((v) => !v)}
             aria-label="Toggle navigation menu"
-            className="md:hidden inline-flex h-10 w-10 items-center justify-center rounded-lg border border-slate-200 dark:border-slate-800 text-slate-700 dark:text-slate-200"
+            aria-expanded={mobileMenuOpen}
+            className="lg:hidden inline-flex h-10 w-10 items-center justify-center rounded-lg border border-slate-200 dark:border-slate-800 text-slate-700 dark:text-slate-200"
           >
             {mobileMenuOpen ? <X className="h-5 w-5" /> : <Menu className="h-5 w-5" />}
           </button>
         </div>
       </div>
 
-      {/* Mobile Navigation Drawer */}
+      {/* Mobile & Tablet Navigation Drawer */}
       {mobileMenuOpen && (
-        <div className="md:hidden border-t border-slate-200 dark:border-slate-800 bg-white dark:bg-[#090D16] px-4 py-4 space-y-3">
-          <div className="flex flex-col space-y-2 text-sm font-medium text-slate-700 dark:text-slate-300">
-            <Link to="/" onClick={() => setMobileMenuOpen(false)} className="py-1.5">
+        <div className="lg:hidden border-t border-slate-200 dark:border-slate-800 bg-white dark:bg-[#090D16] px-4 py-4 space-y-3">
+          <div className="flex flex-col space-y-1.5 text-sm font-medium text-slate-700 dark:text-slate-300">
+            <Link to="/" onClick={() => setMobileMenuOpen(false)} className="py-1.5 hover:text-indigo-600 dark:hover:text-indigo-400">
               Home
             </Link>
-            <Link to="/analyzer" onClick={() => setMobileMenuOpen(false)} className="py-1.5">
-              Analyzer
+            <Link to="/analyzer" onClick={() => setMobileMenuOpen(false)} className="py-1.5 hover:text-indigo-600 dark:hover:text-indigo-400">
+              Resume Analyzer
             </Link>
-            <Link to="/about" onClick={() => setMobileMenuOpen(false)} className="py-1.5">
-              About
+            <Link to="/job-matching" onClick={() => setMobileMenuOpen(false)} className="py-1.5 hover:text-indigo-600 dark:hover:text-indigo-400">
+              Resume vs Job Match
             </Link>
-            <Link to="/contact" onClick={() => setMobileMenuOpen(false)} className="py-1.5">
+            <Link to="/analysis-history" onClick={() => setMobileMenuOpen(false)} className="py-1.5 hover:text-indigo-600 dark:hover:text-indigo-400">
+              Analysis History
+            </Link>
+            <Link to="/about" onClick={() => setMobileMenuOpen(false)} className="py-1.5 hover:text-indigo-600 dark:hover:text-indigo-400">
+              About &amp; Guide
+            </Link>
+            <Link to="/contact" onClick={() => setMobileMenuOpen(false)} className="py-1.5 hover:text-indigo-600 dark:hover:text-indigo-400">
               Contact
             </Link>
           </div>
-          <div className="pt-2 border-t border-slate-100 dark:border-slate-800 grid grid-cols-2 gap-3">
+          <div className="pt-3 border-t border-slate-100 dark:border-slate-800 grid grid-cols-2 gap-3">
             {authSession ? (
               <>
                 <Link
                   to="/workspace"
                   onClick={() => setMobileMenuOpen(false)}
-                  className="text-center rounded-lg border border-slate-200 dark:border-slate-700 px-4 py-2.5 text-sm font-medium"
+                  className="text-center rounded-lg border border-slate-200 dark:border-slate-700 px-4 py-2.5 text-sm font-medium text-slate-800 dark:text-slate-200"
                 >
                   Workspace
+                </Link>
+                <Link
+                  to="/analyzer"
+                  onClick={() => setMobileMenuOpen(false)}
+                  className="text-center rounded-lg bg-indigo-600 hover:bg-indigo-700 px-4 py-2.5 text-sm font-semibold text-white"
+                >
+                  Analyze
                 </Link>
                 <button
                   type="button"
                   onClick={handleSignOut}
-                  className="text-center rounded-lg bg-indigo-600 hover:bg-indigo-700 px-4 py-2.5 text-sm font-medium text-white"
+                  className="col-span-2 text-center rounded-lg border border-slate-200 dark:border-slate-700 px-4 py-2 text-xs font-medium text-slate-600 dark:text-slate-300"
                 >
                   Sign Out
                 </button>
@@ -219,16 +291,16 @@ export function LandingNavbar() {
                 <Link
                   to="/login"
                   onClick={() => setMobileMenuOpen(false)}
-                  className="text-center rounded-lg border border-slate-200 dark:border-slate-700 px-4 py-2.5 text-sm font-medium"
+                  className="text-center rounded-lg border border-slate-200 dark:border-slate-700 px-4 py-2.5 text-sm font-medium text-slate-800 dark:text-slate-200"
                 >
-                  Login
+                  Sign In
                 </Link>
                 <Link
                   to="/signup"
                   onClick={() => setMobileMenuOpen(false)}
                   className="text-center rounded-lg bg-indigo-600 hover:bg-indigo-700 px-4 py-2.5 text-sm font-semibold text-white"
                 >
-                  Sign Up
+                  Get Started
                 </Link>
               </>
             )}
@@ -252,25 +324,22 @@ export function WorkspaceNavbar({ onOpenMobileNav }: WorkspaceNavbarProps) {
 
   const pageLabelMap: Record<string, string> = {
     '/workspace': 'Workspace Dashboard',
-    '/analyzer': 'Resume Analyzer',
+    '/analyzer': 'Resume Intelligence & Job Compatibility',
     '/ats-intelligence': 'ATS Intelligence',
-    '/nlp-laboratory': 'Language Laboratory',
-    '/job-matching': 'Job Matching',
-    '/resume-builder': 'Resume Builder',
-    '/templates': 'Resume Templates',
-    '/cover-letter-studio': 'Cover Letter Studio',
+    '/nlp-laboratory': 'NLP Laboratory',
+    '/job-matching': 'Resume vs. Job Comparison',
     '/career-intelligence': 'Career Intelligence',
     '/skills-gap': 'Skills Gap Analysis',
-    '/resume-comparison': 'Resume Comparison',
+    '/resume-comparison': 'Compare Resumes',
     '/analysis-history': 'Analysis History',
     '/reports': 'Reports Center',
-    '/profile': 'Local Profile',
+    '/profile': 'Local User Profile',
     '/settings': 'Settings',
-    '/about': 'About',
+    '/about': 'About & Guide',
     '/contact': 'Contact',
   };
 
-  const title = pageLabelMap[pathname] || 'ResumeIQ X';
+  const title = pageLabelMap[pathname] || 'ResumeIQ';
 
   const handleSignOut = () => {
     signOut();

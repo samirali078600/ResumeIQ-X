@@ -1,13 +1,15 @@
-import { useState } from 'react';
+import { useMemo, useState } from 'react';
 import { Link } from 'react-router-dom';
-import { Briefcase, Download, Info, PenTool, Sparkles, Upload } from 'lucide-react';
+import { Briefcase, Download, Info, Sparkles, Upload } from 'lucide-react';
 import { WorkspaceLayout } from '../components/layout/WorkspaceLayout';
 import { Card, CardHeader } from '../components/ui/Card';
 import { LocalModelPanel } from '../components/nlp/LocalModelPanel';
+import { ResumeVsJobComparisonPanel } from '../components/analyzer/ResumeVsJobComparisonPanel';
 import { EmptyState } from '../components/ui/StateViews';
 import { ProgressBar } from '../components/ui/ProgressBar';
 import { parseResumeFile } from '../utils/documentParser';
 import { runJobDescriptionMatch } from '../nlp/matching';
+import { buildResumeJobIntelligence } from '../nlp/jobIntelligenceEngine';
 import { computeSemanticSimilarityWithModel, getLoadedModelStatus } from '../nlp/transformersEngine';
 import { exportAnalysisReportPdf } from '../utils/pdfExport';
 import { useAppStore } from '../store/useAppStore';
@@ -30,6 +32,18 @@ export default function JobMatching() {
   const [jobDescription, setJobDescription] = useState(activeJobMatch?.jobDescription || '');
   const [jdFileLoading, setJdFileLoading] = useState(false);
   const [running, setRunning] = useState(false);
+
+  const comparisonIntelligence = useMemo(() => {
+    if (!activeAnalysis || !activeJobMatch) return null;
+    return buildResumeJobIntelligence({
+      analysis: activeAnalysis,
+      companyName: activeJobMatch.company,
+      targetRole: activeJobMatch.jobTitle,
+      jobDescription: activeJobMatch.jobDescription,
+      jobMatch: activeJobMatch,
+      customSkills,
+    });
+  }, [activeAnalysis, activeJobMatch, customSkills]);
 
   const handleJdFileUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
@@ -104,7 +118,7 @@ export default function JobMatching() {
       <WorkspaceLayout>
         <EmptyState
           title="Upload a resume before matching a job description"
-          description="ResumeIQ X matches your actual parsed resume text against a target job posting using TF-IDF cosine similarity, keyword overlap, and skills extraction."
+          description="ResumeIQ matches your actual parsed resume text against a target job posting using TF-IDF cosine similarity, keyword overlap, and skills extraction."
           action={
             <Link
               to="/analyzer"
@@ -124,21 +138,14 @@ export default function JobMatching() {
         <div className="flex flex-wrap items-center justify-between gap-4">
           <div>
             <h1 className="font-display text-2xl font-bold tracking-tight text-slate-900 dark:text-white">
-              Job Description Matching
+              Resume vs. Job Description Comparison
             </h1>
             <p className="mt-1 text-sm text-slate-600 dark:text-slate-400">
-              Compare your resume against a job posting with transparent TF-IDF, keyword overlap, and skills evidence.
+              Compare your resume against any target job posting to clearly see what is the same, what is missing, and what to improve.
             </p>
           </div>
           {activeJobMatch && (
             <div className="flex flex-wrap items-center gap-2.5">
-              <Link
-                to="/cover-letter-studio"
-                className="inline-flex items-center gap-2 rounded-lg border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 px-4 py-2 text-sm font-medium text-slate-700 dark:text-slate-200 hover:bg-slate-50 dark:hover:bg-slate-800 whitespace-nowrap"
-              >
-                <PenTool className="h-4 w-4 text-indigo-600 dark:text-indigo-400" />
-                <span>Draft Cover Letter</span>
-              </Link>
               <button
                 type="button"
                 onClick={() => exportAnalysisReportPdf(activeAnalysis, activeJobMatch)}
@@ -199,7 +206,7 @@ export default function JobMatching() {
                   type="text"
                   value={company}
                   onChange={(e) => setCompany(e.target.value)}
-                  placeholder="e.g., Acme Corp"
+                  placeholder="Enter target company name"
                   className="w-full rounded-lg border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-950 px-3 py-2 text-sm text-slate-900 dark:text-white"
                 />
               </div>
@@ -258,7 +265,7 @@ export default function JobMatching() {
 
             <div className="flex flex-wrap items-center justify-between gap-3">
               <p className="text-xs text-slate-500 dark:text-slate-400">
-                Missing skills are reported as learning or tailoring gaps — ResumeIQ X never inserts unverified skills into your resume.
+                Missing skills are reported as learning or tailoring gaps — ResumeIQ never inserts unverified skills into your resume.
               </p>
               <button
                 type="submit"
@@ -278,6 +285,14 @@ export default function JobMatching() {
         {/* Match Results */}
         {activeJobMatch && (
           <>
+            {comparisonIntelligence && (
+              <ResumeVsJobComparisonPanel
+                analysis={activeAnalysis}
+                jobMatch={activeJobMatch}
+                intelligence={comparisonIntelligence}
+              />
+            )}
+
             <div className="rounded-xl border border-indigo-200/80 dark:border-indigo-900/60 bg-indigo-50/60 dark:bg-[#0D1529] p-4 flex items-start gap-3">
               <Info className="h-4 w-4 text-indigo-600 dark:text-indigo-400 shrink-0 mt-0.5" />
               <p className="text-xs leading-relaxed text-slate-700 dark:text-slate-300">

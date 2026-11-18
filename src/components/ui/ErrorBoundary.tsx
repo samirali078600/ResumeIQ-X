@@ -21,7 +21,7 @@ export class ErrorBoundary extends Component<Props, State> {
   }
 
   componentDidCatch(error: Error, info: ErrorInfo) {
-    console.error('ResumeIQ X ErrorBoundary caught:', error, info);
+    console.error('ResumeIQ ErrorBoundary caught:', error, info);
   }
 
   render() {

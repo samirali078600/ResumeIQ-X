@@ -14,9 +14,6 @@ const ResumeAnalyzer = lazy(() => import('./pages/ResumeAnalyzer'));
 const ATSIntelligence = lazy(() => import('./pages/ATSIntelligence'));
 const NLPLaboratory = lazy(() => import('./pages/NLPLaboratory'));
 const JobMatching = lazy(() => import('./pages/JobMatching'));
-const ResumeBuilder = lazy(() => import('./pages/ResumeBuilder'));
-const TemplatesGallery = lazy(() => import('./pages/TemplatesGallery'));
-const CoverLetterStudio = lazy(() => import('./pages/CoverLetterStudio'));
 const CareerIntelligence = lazy(() => import('./pages/CareerIntelligence'));
 const SkillsGap = lazy(() => import('./pages/SkillsGap'));
 const ResumeComparison = lazy(() => import('./pages/ResumeComparison'));
@@ -108,30 +105,6 @@ export default function App() {
               element={
                 <RequireAuth>
                   <JobMatching />
-                </RequireAuth>
-              }
-            />
-            <Route
-              path="/resume-builder"
-              element={
-                <RequireAuth>
-                  <ResumeBuilder />
-                </RequireAuth>
-              }
-            />
-            <Route
-              path="/templates"
-              element={
-                <RequireAuth>
-                  <TemplatesGallery />
-                </RequireAuth>
-              }
-            />
-            <Route
-              path="/cover-letter-studio"
-              element={
-                <RequireAuth>
-                  <CoverLetterStudio />
                 </RequireAuth>
               }
             />

@@ -48,7 +48,7 @@ export default function SettingsPage() {
       const url = URL.createObjectURL(blob);
       const a = document.createElement('a');
       a.href = url;
-      a.download = `ResumeIQX_Full_Backup_${new Date().toISOString().slice(0, 10)}.json`;
+      a.download = `ResumeIQ_Full_Backup_${new Date().toISOString().slice(0, 10)}.json`;
       a.click();
       URL.revokeObjectURL(url);
       addToast({ type: 'success', title: 'Full JSON backup exported' });
@@ -319,7 +319,7 @@ export default function SettingsPage() {
         onClose={() => setConfirmWipe(false)}
         onConfirm={handleWipeAll}
         title="Delete All Local Data"
-        message="This permanently erases your local profile, saved resume analyses, job match history, resume builder drafts, cover letters, and custom skills from IndexedDB."
+        message="This permanently erases your local profile, saved resume analyses, job match history, and custom skills from IndexedDB."
         confirmLabel="Erase Everything"
         destructive
       />

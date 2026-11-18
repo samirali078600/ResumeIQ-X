@@ -78,7 +78,7 @@ export async function parseResumeFile(
   if (!detectedType) {
     throw new DocumentParseError(
       'INVALID_TYPE',
-      `Unsupported file format ("${file.name}"). Please upload a PDF (.pdf), Word (.docx), or plain text (.txt) file.`
+      'This file format is not supported. Please upload a PDF, DOCX, or TXT file.'
     );
   }
 
@@ -213,7 +213,7 @@ export async function parseResumeFile(
     if (nonWhitespaceCount < 30) {
       throw new DocumentParseError(
         'SCANNED_PDF',
-        `Detected ${numPages} PDF page(s), but no extractable text layer was found. This appears to be a scanned image or flattened graphic PDF. ResumeIQ X does not perform fake OCR—please export a text-selectable PDF, DOCX, or TXT file.`
+        `We couldn't find selectable text in this ${numPages}-page PDF. It may contain scanned images. OCR is not available in this version.`
       );
     }
 

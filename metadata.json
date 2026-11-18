@@ -1,6 +1,6 @@
 {
-  "name": "ResumeIQ X",
-  "description": "Your Career. Analyzed. Optimized. Elevated. Complete browser-based resume intelligence platform with local document parsing, hybrid NLP, transparent ATS scoring, job matching, and resume builder.",
+  "name": "ResumeIQ",
+  "description": "A Browser-Based Resume Intelligence & Career Optimization Platform.",
   "requestFramePermissions": [],
   "majorCapabilities": []
 }

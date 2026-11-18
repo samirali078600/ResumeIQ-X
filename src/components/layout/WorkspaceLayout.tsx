@@ -1,6 +1,6 @@
 import { useState, type ReactNode } from 'react';
 import { NavLink } from 'react-router-dom';
-import { Briefcase, FileCheck2, FilePlus2, LayoutDashboard, ShieldCheck } from 'lucide-react';
+import { Briefcase, FileCheck2, History, LayoutDashboard, ShieldCheck } from 'lucide-react';
 import { Sidebar } from './Sidebar';
 import { WorkspaceNavbar } from './Navbar';
 import { useAppStore } from '../../store/useAppStore';
@@ -14,7 +14,7 @@ const MOBILE_BOTTOM_LINKS = [
   { to: '/analyzer', label: 'Analyze', icon: FileCheck2 },
   { to: '/ats-intelligence', label: 'ATS', icon: ShieldCheck },
   { to: '/job-matching', label: 'Match', icon: Briefcase },
-  { to: '/resume-builder', label: 'Builder', icon: FilePlus2 },
+  { to: '/analysis-history', label: 'History', icon: History },
 ];
 
 export function WorkspaceLayout({ children }: WorkspaceLayoutProps) {

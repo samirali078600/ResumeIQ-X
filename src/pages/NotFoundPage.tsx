@@ -10,7 +10,7 @@ export default function NotFoundPage() {
           Page not found
         </h1>
         <p className="text-sm text-slate-600 dark:text-slate-400">
-          The requested route does not exist in ResumeIQ X. Return to the landing page or your local workspace.
+          The requested route does not exist in ResumeIQ. Return to the home page or your local workspace.
         </p>
         <div className="flex items-center justify-center gap-3 pt-2">
           <Link

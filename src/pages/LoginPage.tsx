@@ -67,7 +67,7 @@ export default function LoginPage() {
           <div className="rounded-2xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 p-7 sm:p-8 shadow-sm">
             <div>
               <h1 className="font-display text-2xl font-bold tracking-tight text-slate-900 dark:text-white">
-                Sign in to ResumeIQ X
+                Sign in to ResumeIQ
               </h1>
               <p className="mt-1.5 text-sm text-slate-600 dark:text-slate-400">
                 Access your resume analyzer, ATS scoring, and local workspace.
@@ -98,7 +98,7 @@ export default function LoginPage() {
                   autoComplete="email"
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
-                  placeholder="you@example.com"
+                  placeholder="Enter your email address"
                   className="w-full rounded-lg border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-950 px-3.5 py-2.5 text-sm text-slate-900 dark:text-white focus:border-indigo-500 focus:outline-none"
                 />
               </div>

@@ -1,5 +1,5 @@
 import { useState, type ReactNode } from 'react';
-import { Copy, Info, Mail } from 'lucide-react';
+import { Copy, Mail } from 'lucide-react';
 import { LandingNavbar } from '../components/layout/Navbar';
 import { WorkspaceLayout } from '../components/layout/WorkspaceLayout';
 import { Card, CardHeader } from '../components/ui/Card';
@@ -21,7 +21,7 @@ export default function ContactPage() {
   const addToast = useAppStore((s) => s.addToast);
   const [name, setName] = useState(authSession?.fullName || '');
   const [email, setEmail] = useState(authSession?.email || '');
-  const [subject, setSubject] = useState('ResumeIQ X Feedback');
+  const [subject, setSubject] = useState('ResumeIQ Feedback');
   const [message, setMessage] = useState('');
   const [submittedNotice, setSubmittedNotice] = useState(false);
 
@@ -41,15 +41,15 @@ export default function ContactPage() {
     }
 
     const body = `From: ${name.trim()} (${email.trim()})\n\n${message.trim()}`;
-    const mailtoUrl = `mailto:support@resumeiqx.local?subject=${encodeURIComponent(
+    const mailtoUrl = `mailto:support@resumeiq.local?subject=${encodeURIComponent(
       subject.trim()
     )}&body=${encodeURIComponent(body)}`;
     window.location.href = mailtoUrl;
     setSubmittedNotice(true);
     addToast({
       type: 'info',
-      title: 'Email client draft triggered',
-      description: 'No message was sent to a server; ResumeIQ X has no backend.',
+      title: 'Email client draft opened',
+      description: 'Your default email handler was invoked with the composed message.',
     });
   };
 
@@ -71,13 +71,6 @@ export default function ContactPage() {
         </h1>
         <p className="mt-1 text-sm text-slate-600 dark:text-slate-400">
           Prepare an email draft or copy feedback locally.
-        </p>
-      </div>
-
-      <div className="rounded-xl border border-slate-200 dark:border-slate-800 bg-slate-100/70 dark:bg-slate-900/70 p-4 flex items-start gap-3">
-        <Info className="h-4 w-4 text-indigo-600 dark:text-indigo-400 shrink-0 mt-0.5" />
-        <p className="text-xs leading-relaxed text-slate-700 dark:text-slate-300">
-          <strong>No Backend Server:</strong> Because ResumeIQ X operates strictly inside your browser, submitting this form opens your local email client via a <code className="font-mono">mailto:</code> link rather than transmitting data to a remote server.
         </p>
       </div>
 

@@ -64,7 +64,7 @@ export const DEFAULT_PROFILE: UserProfile = {
 
 export interface BackupPayload {
   schemaVersion: number;
-  app: 'ResumeIQ X';
+  app: 'ResumeIQ' | 'ResumeIQ X';
   exportedAt: string;
   data: {
     profiles: UserProfile[];
@@ -130,7 +130,7 @@ export async function exportLocalBackup(): Promise<BackupPayload> {
 
   return {
     schemaVersion: 1,
-    app: 'ResumeIQ X',
+    app: 'ResumeIQ',
     exportedAt: new Date().toISOString(),
     data: {
       profiles,
@@ -147,7 +147,7 @@ export async function exportLocalBackup(): Promise<BackupPayload> {
 export function validateBackupPayload(raw: unknown): raw is BackupPayload {
   if (!raw || typeof raw !== 'object') return false;
   const obj = raw as Record<string, unknown>;
-  if (obj.app !== 'ResumeIQ X' || obj.schemaVersion !== 1) return false;
+  if ((obj.app !== 'ResumeIQ' && obj.app !== 'ResumeIQ X') || obj.schemaVersion !== 1) return false;
   if (!obj.data || typeof obj.data !== 'object') return false;
   const data = obj.data as Record<string, unknown>;
   const requiredArrays = [

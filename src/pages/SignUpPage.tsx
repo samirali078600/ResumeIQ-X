@@ -40,7 +40,7 @@ export default function SignUpPage() {
       addToast({
         type: 'success',
         title: 'Account created locally',
-        description: `Welcome to ResumeIQ X, ${session.fullName}.`,
+        description: `Welcome to ResumeIQ, ${session.fullName}.`,
       });
       navigate(redirectTo.startsWith('/') ? redirectTo : '/workspace', { replace: true });
     } catch (err) {
@@ -59,10 +59,10 @@ export default function SignUpPage() {
           <div className="rounded-2xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 p-7 sm:p-8 shadow-sm">
             <div>
               <h1 className="font-display text-2xl font-bold tracking-tight text-slate-900 dark:text-white">
-                Create your ResumeIQ X account
+                Create your ResumeIQ account
               </h1>
               <p className="mt-1.5 text-sm text-slate-600 dark:text-slate-400">
-                Sign up to unlock the Resume Analyzer, ATS Intelligence, Job Matching, and Resume Builder.
+                Sign up to unlock the Resume Analyzer, ATS Intelligence, Resume vs. Job Match, and Reports Center.
               </p>
             </div>
 
@@ -90,7 +90,7 @@ export default function SignUpPage() {
                   autoComplete="name"
                   value={fullName}
                   onChange={(e) => setFullName(e.target.value)}
-                  placeholder="Alex Rivera"
+                  placeholder="Enter your full name"
                   className="w-full rounded-lg border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-950 px-3.5 py-2.5 text-sm text-slate-900 dark:text-white focus:border-indigo-500 focus:outline-none"
                 />
               </div>
@@ -109,7 +109,7 @@ export default function SignUpPage() {
                   autoComplete="email"
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
-                  placeholder="you@example.com"
+                  placeholder="Enter your email address"
                   className="w-full rounded-lg border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-950 px-3.5 py-2.5 text-sm text-slate-900 dark:text-white focus:border-indigo-500 focus:outline-none"
                 />
               </div>

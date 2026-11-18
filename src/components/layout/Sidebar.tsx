@@ -38,9 +38,9 @@ export function Sidebar({ mobileOpen, onCloseMobile }: SidebarProps) {
           className="flex items-center gap-2.5 font-display text-lg font-bold tracking-tight text-slate-900 dark:text-white whitespace-nowrap shrink-0"
         >
           <span className="flex h-7 w-7 items-center justify-center rounded-lg bg-gradient-to-br from-indigo-600 to-violet-600 text-xs font-extrabold text-white shadow-xs">
-            RX
+            RI
           </span>
-          {(!collapsed || isMobile) && <span>ResumeIQ X</span>}
+          {(!collapsed || isMobile) && <span>ResumeIQ</span>}
         </Link>
         {isMobile ? (
           <button

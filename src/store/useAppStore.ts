@@ -270,13 +270,23 @@ export const useAppStore = create<AppState>((set, get) => ({
         get().addToast({
           type: 'warning',
           title: 'Profile kept in memory only',
-          description: 'IndexedDB is unavailable in this browser context.',
+          description: "We couldn't save your changes to browser storage. Please try again.",
         });
       }
     }
   },
 
-  setActiveAnalysis: (record) => set({ activeAnalysis: record }),
+  setActiveAnalysis: (record) => {
+    if (!record) {
+      set({ activeAnalysis: null });
+      return;
+    }
+    const matchingJob = get().jobMatches.find((m) => m.analysisId === record.id) || null;
+    set({
+      activeAnalysis: record,
+      activeJobMatch: matchingJob ?? get().activeJobMatch,
+    });
+  },
 
   saveAnalysisToLocal: async (record) => {
     try {
@@ -303,7 +313,7 @@ export const useAppStore = create<AppState>((set, get) => ({
         get().addToast({
           type: 'error',
           title: 'Local save failed',
-          description: err instanceof Error ? err.message : 'Unable to write to IndexedDB.',
+          description: "We couldn't save your changes. Please try again.",
         });
       }
       return false;
@@ -405,7 +415,7 @@ export const useAppStore = create<AppState>((set, get) => ({
         get().addToast({
           type: 'warning',
           title: 'Saved to memory only',
-          description: 'IndexedDB storage is unavailable.',
+          description: "We couldn't save your changes to browser storage. Please try again.",
         });
       }
       return false;
@@ -441,7 +451,7 @@ export const useAppStore = create<AppState>((set, get) => ({
         get().addToast({
           type: 'warning',
           title: 'Saved to memory only',
-          description: 'IndexedDB storage is unavailable.',
+          description: "We couldn't save your changes to browser storage. Please try again.",
         });
       }
       return false;

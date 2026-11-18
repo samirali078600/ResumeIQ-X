@@ -1,4 +1,4 @@
-import { useMemo, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { Link } from 'react-router-dom';
 import {
   Area,
@@ -14,34 +14,46 @@ import {
 import {
   ArrowRight,
   Award,
+  Briefcase,
+  Check,
   CheckSquare,
   FileCheck2,
-  FilePlus2,
+  FileSpreadsheet,
   FolderKanban,
   Gauge,
+  Save,
   UserCheck,
 } from 'lucide-react';
 import { WorkspaceLayout } from '../components/layout/WorkspaceLayout';
 import { Card, CardHeader } from '../components/ui/Card';
 import { ChartTooltipContent } from '../components/ui/ChartTooltip';
-import { EmptyState, LoadingSkeleton } from '../components/ui/StateViews';
+import { EmptyState, ErrorState, LoadingSkeleton } from '../components/ui/StateViews';
 import { useAppStore } from '../store/useAppStore';
 import type { ExperienceLevel } from '../types/resume';
 
 export default function WorkspaceDashboard() {
   const hydrated = useAppStore((s) => s.hydrated);
+  const storageError = useAppStore((s) => s.storageError);
   const profile = useAppStore((s) => s.profile);
   const saveProfile = useAppStore((s) => s.saveProfile);
   const analyses = useAppStore((s) => s.analyses);
-  const resumes = useAppStore((s) => s.resumes);
+  const activeAnalysis = useAppStore((s) => s.activeAnalysis);
   const jobMatches = useAppStore((s) => s.jobMatches);
   const activities = useAppStore((s) => s.activities);
   const setActiveAnalysis = useAppStore((s) => s.setActiveAnalysis);
+  const saveAnalysisToLocal = useAppStore((s) => s.saveAnalysisToLocal);
+  const updateAnalysisRecord = useAppStore((s) => s.updateAnalysisRecord);
   const addToast = useAppStore((s) => s.addToast);
 
   const [setupName, setSetupName] = useState(profile.displayName);
   const [setupTarget, setSetupTarget] = useState(profile.careerTarget);
   const [setupLevel, setSetupLevel] = useState<ExperienceLevel>(profile.experienceLevel);
+
+  useEffect(() => {
+    setSetupName(profile.displayName);
+    setSetupTarget(profile.careerTarget);
+    setSetupLevel(profile.experienceLevel);
+  }, [profile.displayName, profile.careerTarget, profile.experienceLevel]);
 
   const stats = useMemo(() => {
     const total = analyses.length;
@@ -87,11 +99,25 @@ export default function WorkspaceDashboard() {
       .slice(0, 8);
   }, [analyses]);
 
+  const latestAnalysis = analyses[0] || null;
   const pendingTasks = useMemo(() => {
-    const latest = analyses[0];
-    if (!latest) return [];
-    return latest.ats.suggestions.filter((s) => !s.completed).slice(0, 5);
-  }, [analyses]);
+    if (!latestAnalysis) return [];
+    return latestAnalysis.ats.suggestions.slice(0, 5);
+  }, [latestAnalysis]);
+
+  const handleToggleTask = async (suggestionId: string) => {
+    if (!latestAnalysis) return;
+    const nextSuggestions = latestAnalysis.ats.suggestions.map((s) =>
+      s.id === suggestionId ? { ...s, completed: !s.completed } : s
+    );
+    await updateAnalysisRecord({
+      ...latestAnalysis,
+      ats: {
+        ...latestAnalysis.ats,
+        suggestions: nextSuggestions,
+      },
+    });
+  };
 
   const handleQuickSetup = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -131,16 +157,23 @@ export default function WorkspaceDashboard() {
             <p className="mt-1 text-sm text-slate-600 dark:text-slate-400">
               {profile.careerTarget
                 ? `Target Role: ${profile.careerTarget} · All metrics derived from your local IndexedDB records`
-                : 'Statistics below reflect only your real locally stored analyses and drafts.'}
+                : 'Statistics below reflect only your real locally stored analyses and job comparisons.'}
             </p>
           </div>
           <div className="flex flex-wrap items-center gap-2.5">
             <Link
-              to="/resume-builder"
+              to="/job-matching"
               className="inline-flex items-center gap-2 rounded-lg border border-slate-200 dark:border-slate-800 bg-white dark:bg-[#0D1526] hover:bg-slate-50 dark:hover:bg-slate-800/70 px-4 py-2 text-sm font-medium text-slate-700 dark:text-slate-200 transition-colors whitespace-nowrap shrink-0"
             >
-              <FilePlus2 className="h-4 w-4 text-violet-600 dark:text-violet-400" />
-              <span>New Resume Draft</span>
+              <Briefcase className="h-4 w-4 text-indigo-600 dark:text-indigo-400" />
+              <span>Resume vs. Job</span>
+            </Link>
+            <Link
+              to="/reports"
+              className="inline-flex items-center gap-2 rounded-lg border border-slate-200 dark:border-slate-800 bg-white dark:bg-[#0D1526] hover:bg-slate-50 dark:hover:bg-slate-800/70 px-4 py-2 text-sm font-medium text-slate-700 dark:text-slate-200 transition-colors whitespace-nowrap shrink-0"
+            >
+              <FileSpreadsheet className="h-4 w-4 text-violet-600 dark:text-violet-400" />
+              <span>Reports Center</span>
             </Link>
             <Link
               to="/analyzer"
@@ -152,12 +185,43 @@ export default function WorkspaceDashboard() {
           </div>
         </div>
 
+        {storageError && (
+          <ErrorState title="Browser Storage Notice" message={storageError} />
+        )}
+
+        {/* Unsaved session notice if user analyzed with auto-save off */}
+        {activeAnalysis && !analyses.some((a) => a.id === activeAnalysis.id) && (
+          <Card padding="sm">
+            <div className="flex flex-wrap items-center justify-between gap-3">
+              <div className="text-xs">
+                <p className="font-semibold text-slate-900 dark:text-white">
+                  Active session resume not yet saved to history: {activeAnalysis.fileName}
+                </p>
+                <p className="text-slate-600 dark:text-slate-400">
+                  Save it to IndexedDB to track score trends in Workspace and Analysis History.
+                </p>
+              </div>
+              <button
+                type="button"
+                onClick={async () => {
+                  const ok = await saveAnalysisToLocal(activeAnalysis);
+                  if (ok) addToast({ type: 'success', title: 'Saved active analysis to Workspace & History' });
+                }}
+                className="inline-flex items-center gap-1.5 rounded-lg bg-indigo-600 hover:bg-indigo-700 px-3.5 py-2 text-xs font-semibold text-white whitespace-nowrap"
+              >
+                <Save className="h-3.5 w-3.5" />
+                <span>Save to Workspace</span>
+              </button>
+            </div>
+          </Card>
+        )}
+
         {/* Local Workspace Setup Prompt (only when displayName is empty) */}
         {!profile.displayName && (
           <Card>
             <CardHeader
               title="Set up your local workspace profile"
-              subtitle="This is a browser-only local profile stored in IndexedDB — not a cloud account or authentication system."
+              subtitle="This is a browser-only local profile stored in IndexedDB — not a cloud account."
             />
             <form onSubmit={handleQuickSetup} className="grid grid-cols-1 sm:grid-cols-4 gap-4 items-end">
               <div>
@@ -168,7 +232,7 @@ export default function WorkspaceDashboard() {
                   type="text"
                   value={setupName}
                   onChange={(e) => setSetupName(e.target.value)}
-                  placeholder="e.g., Jordan Patel"
+                  placeholder="Enter your display name"
                   className="w-full rounded-lg border border-slate-300 dark:border-slate-700 bg-white dark:bg-[#080D1A] px-3 py-2 text-sm text-slate-900 dark:text-white focus:border-indigo-500 focus:outline-none"
                 />
               </div>
@@ -180,7 +244,7 @@ export default function WorkspaceDashboard() {
                   type="text"
                   value={setupTarget}
                   onChange={(e) => setSetupTarget(e.target.value)}
-                  placeholder="e.g., Senior Frontend Engineer"
+                  placeholder="Enter target role title"
                   className="w-full rounded-lg border border-slate-300 dark:border-slate-700 bg-white dark:bg-[#080D1A] px-3 py-2 text-sm text-slate-900 dark:text-white focus:border-indigo-500 focus:outline-none"
                 />
               </div>
@@ -221,7 +285,7 @@ export default function WorkspaceDashboard() {
               {stats.total}
             </p>
             <p className="mt-1 text-xs text-slate-500 dark:text-slate-400 tabular-nums">
-              {jobMatches.length} job match comparison(s)
+              {jobMatches.length} job comparison(s) saved
             </p>
           </Card>
 
@@ -230,8 +294,8 @@ export default function WorkspaceDashboard() {
               <p className="text-xs font-medium text-slate-500 dark:text-slate-400">Average ATS Heuristic</p>
               <Gauge className="h-4 w-4 text-violet-600 dark:text-violet-400" />
             </div>
-            <p className="mt-2 font-mono text-2xl font-bold tabular-nums text-slate-900 dark:text-white">
-              {stats.total > 0 ? `${stats.avgScore}/100` : '—'}
+            <p className="mt-2 font-mono text-lg sm:text-xl font-bold tabular-nums text-slate-900 dark:text-white">
+              {stats.total > 0 ? `${stats.avgScore}/100` : 'Not available'}
             </p>
             <p className="mt-1 text-xs text-slate-500 dark:text-slate-400">
               Weighted 14-category rubric
@@ -243,8 +307,8 @@ export default function WorkspaceDashboard() {
               <p className="text-xs font-medium text-slate-500 dark:text-slate-400">Highest ATS Score</p>
               <Award className="h-4 w-4 text-indigo-600 dark:text-indigo-400" />
             </div>
-            <p className="mt-2 font-mono text-2xl font-bold tabular-nums text-indigo-600 dark:text-indigo-400">
-              {stats.total > 0 ? `${stats.highestScore}/100` : '—'}
+            <p className="mt-2 font-mono text-lg sm:text-xl font-bold tabular-nums text-indigo-600 dark:text-indigo-400">
+              {stats.total > 0 ? `${stats.highestScore}/100` : 'Not available'}
             </p>
             <p className="mt-1 text-xs text-slate-500 dark:text-slate-400 tabular-nums">
               {stats.totalSkills} unique dictionary skills
@@ -253,14 +317,14 @@ export default function WorkspaceDashboard() {
 
           <Card padding="sm">
             <div className="flex items-center justify-between gap-2">
-              <p className="text-xs font-medium text-slate-500 dark:text-slate-400">Builder Drafts</p>
-              <FilePlus2 className="h-4 w-4 text-violet-600 dark:text-violet-400" />
+              <p className="text-xs font-medium text-slate-500 dark:text-slate-400">Job Comparisons</p>
+              <Briefcase className="h-4 w-4 text-violet-600 dark:text-violet-400" />
             </div>
             <p className="mt-2 font-mono text-2xl font-bold tabular-nums text-slate-900 dark:text-white">
-              {resumes.length}
+              {jobMatches.length}
             </p>
-            <p className="mt-1 text-xs text-slate-500 dark:text-slate-400">
-              Stored in browser IndexedDB
+            <p className="mt-1 text-xs text-slate-500 dark:text-slate-400 tabular-nums">
+              {jobMatches[0] ? `Latest: ${jobMatches[0].overallMatchScore}% match` : 'Stored in browser IndexedDB'}
             </p>
           </Card>
         </div>
@@ -268,8 +332,8 @@ export default function WorkspaceDashboard() {
         {/* Empty State or Real Charts + Tables */}
         {analyses.length === 0 ? (
           <EmptyState
-            title="No saved resume analyses yet"
-            description="Upload a PDF, DOCX, or TXT resume in the Resume Analyzer to inspect extracted text, NLP entities, and transparent ATS heuristics. Once you save an analysis, your trends and skill distributions will appear here."
+            title="No resume analyses yet."
+            description="Upload your resume to get started. Your saved reports, job comparisons, and skill distributions will appear here automatically."
             action={
               <Link
                 to="/analyzer"
@@ -283,13 +347,13 @@ export default function WorkspaceDashboard() {
         ) : (
           <>
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-              <Card>
+              <Card className="min-w-0">
                 <CardHeader
                   title="ATS Score History"
                   subtitle="Calculated heuristic scores across your saved resume versions"
                 />
-                <div className="h-64 w-full">
-                  <ResponsiveContainer width="100%" height="100%">
+                <div className="w-full min-w-0">
+                  <ResponsiveContainer width="100%" height={256}>
                     <AreaChart data={scoreHistoryData} margin={{ top: 8, right: 12, left: -16, bottom: 0 }}>
                       <defs>
                         <linearGradient id="scoreAreaGrad" x1="0" y1="0" x2="0" y2="1">
@@ -314,13 +378,13 @@ export default function WorkspaceDashboard() {
                 </div>
               </Card>
 
-              <Card>
+              <Card className="min-w-0">
                 <CardHeader
                   title="Skills Distribution by Category"
                   subtitle="Aggregated dictionary and custom skills detected across saved analyses"
                 />
-                <div className="h-64 w-full">
-                  <ResponsiveContainer width="100%" height="100%">
+                <div className="w-full min-w-0">
+                  <ResponsiveContainer width="100%" height={256}>
                     <BarChart
                       data={skillsDistributionData}
                       margin={{ top: 8, right: 12, left: -16, bottom: 0 }}
@@ -338,7 +402,7 @@ export default function WorkspaceDashboard() {
 
             <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
               {/* Recent Analyses Table */}
-              <Card className="lg:col-span-7">
+              <Card className="lg:col-span-7 min-w-0">
                 <CardHeader
                   title="Recent Resume Analyses"
                   subtitle="Latest documents saved to local IndexedDB"
@@ -347,7 +411,7 @@ export default function WorkspaceDashboard() {
                       to="/analysis-history"
                       className="text-xs font-semibold text-indigo-600 dark:text-indigo-400 hover:underline whitespace-nowrap"
                     >
-                      View all
+                      View all history
                     </Link>
                   }
                 />
@@ -359,72 +423,105 @@ export default function WorkspaceDashboard() {
                         <th className="py-2.5 px-2 text-right">Skills</th>
                         <th className="py-2.5 px-2 text-right">ATS</th>
                         <th className="py-2.5 px-2 text-right hidden sm:table-cell">Saved</th>
-                        <th className="py-2.5 pl-2 text-right">Action</th>
+                        <th className="py-2.5 pl-2 text-right">Actions</th>
                       </tr>
                     </thead>
                     <tbody className="divide-y divide-slate-100 dark:divide-slate-800/80 text-xs">
-                      {analyses.slice(0, 6).map((item) => (
-                        <tr
-                          key={item.id}
-                          className="h-11 hover:bg-slate-50/80 dark:hover:bg-slate-800/40 transition-colors"
-                        >
-                          <td className="py-2 pr-3 max-w-[190px]">
-                            <p className="font-medium text-slate-900 dark:text-white truncate">
-                              {item.fileName}
-                            </p>
-                            <p className="text-[11px] text-slate-500 dark:text-slate-400">
-                              {item.fileType.toUpperCase()}
-                            </p>
-                          </td>
-                          <td className="py-2 px-2 text-right font-mono tabular-nums text-slate-600 dark:text-slate-300">
-                            {item.nlp.skills.found.length}
-                          </td>
-                          <td className="py-2 px-2 text-right font-mono font-semibold tabular-nums text-indigo-600 dark:text-indigo-400">
-                            {item.ats.overallScore}/100
-                          </td>
-                          <td className="py-2 px-2 text-right font-mono tabular-nums text-slate-500 dark:text-slate-400 hidden sm:table-cell">
-                            {new Date(item.createdAt).toLocaleDateString()}
-                          </td>
-                          <td className="py-2 pl-2 text-right">
-                            <Link
-                              to="/ats-intelligence"
-                              onClick={() => setActiveAnalysis(item)}
-                              className="inline-flex items-center rounded-md border border-slate-200 dark:border-slate-700 px-2.5 py-1 text-xs font-medium text-slate-700 dark:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors"
-                            >
-                              Inspect
-                            </Link>
-                          </td>
-                        </tr>
-                      ))}
+                      {analyses.slice(0, 6).map((item) => {
+                        const linkedJob = jobMatches.find((m) => m.analysisId === item.id);
+                        return (
+                          <tr
+                            key={item.id}
+                            className="h-12 hover:bg-slate-50/80 dark:hover:bg-slate-800/40 transition-colors"
+                          >
+                            <td className="py-2 pr-3 max-w-[200px]">
+                              <p className="font-medium text-slate-900 dark:text-white truncate">
+                                {item.fileName}
+                              </p>
+                              <p className="text-[11px] text-slate-500 dark:text-slate-400 truncate">
+                                {item.fileType.toUpperCase()}
+                                {linkedJob ? ` · ${linkedJob.jobTitle} (${linkedJob.overallMatchScore}%)` : ''}
+                              </p>
+                            </td>
+                            <td className="py-2 px-2 text-right font-mono tabular-nums text-slate-600 dark:text-slate-300">
+                              {item.nlp.skills.found.length}
+                            </td>
+                            <td className="py-2 px-2 text-right font-mono font-semibold tabular-nums text-indigo-600 dark:text-indigo-400">
+                              {item.ats.overallScore}/100
+                            </td>
+                            <td className="py-2 px-2 text-right font-mono tabular-nums text-slate-500 dark:text-slate-400 hidden sm:table-cell">
+                              {new Date(item.createdAt).toLocaleDateString()}
+                            </td>
+                            <td className="py-2 pl-2 text-right whitespace-nowrap">
+                              <div className="inline-flex items-center gap-1.5">
+                                <Link
+                                  to="/analyzer"
+                                  onClick={() => setActiveAnalysis(item)}
+                                  className="inline-flex items-center rounded-md bg-indigo-600 hover:bg-indigo-700 px-2.5 py-1 text-xs font-medium text-white transition-colors"
+                                >
+                                  Open
+                                </Link>
+                                <Link
+                                  to="/ats-intelligence"
+                                  onClick={() => setActiveAnalysis(item)}
+                                  className="inline-flex items-center rounded-md border border-slate-200 dark:border-slate-700 px-2 py-1 text-xs font-medium text-slate-700 dark:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors"
+                                >
+                                  ATS
+                                </Link>
+                              </div>
+                            </td>
+                          </tr>
+                        );
+                      })}
                     </tbody>
                   </table>
                 </div>
               </Card>
 
-              {/* Pending Improvement Tasks + Recent Activity */}
+              {/* Interactive Improvement Tasks + Recent Activity */}
               <div className="lg:col-span-5 space-y-6">
                 <Card>
                   <CardHeader
-                    title="Pending Improvement Tasks"
-                    subtitle={analyses[0] ? `From ${analyses[0].fileName}` : undefined}
+                    title="Improvement Tasks"
+                    subtitle={latestAnalysis ? `From ${latestAnalysis.fileName} (click to toggle)` : undefined}
                   />
                   {pendingTasks.length === 0 ? (
                     <p className="text-sm text-slate-600 dark:text-slate-400">
-                      All suggestions on your latest resume are checked off.
+                      No improvement suggestions generated for your latest resume.
                     </p>
                   ) : (
-                    <ul className="space-y-3">
+                    <ul className="space-y-2.5">
                       {pendingTasks.map((task) => (
-                        <li key={task.id} className="flex items-start gap-2.5 text-sm">
-                          <CheckSquare className="h-4 w-4 text-indigo-600 dark:text-indigo-400 shrink-0 mt-0.5" />
-                          <div>
-                            <p className="font-medium text-slate-900 dark:text-white leading-snug">
-                              {task.title}
-                            </p>
-                            <p className="mt-0.5 text-xs text-slate-500 dark:text-slate-400">
-                              {task.category} · {task.priority} priority
-                            </p>
-                          </div>
+                        <li key={task.id}>
+                          <button
+                            type="button"
+                            onClick={() => handleToggleTask(task.id)}
+                            className="w-full text-left flex items-start gap-2.5 rounded-lg p-2 hover:bg-slate-50 dark:hover:bg-slate-800/50 transition-colors text-sm"
+                          >
+                            <span
+                              className={`mt-0.5 flex h-4 w-4 shrink-0 items-center justify-center rounded border ${
+                                task.completed
+                                  ? 'bg-emerald-600 border-emerald-600 text-white'
+                                  : 'border-indigo-400 dark:border-indigo-500 text-transparent'
+                              }`}
+                            >
+                              {task.completed ? <Check className="h-3 w-3" /> : <CheckSquare className="h-3 w-3 text-indigo-500 opacity-0" />}
+                            </span>
+                            <div className="min-w-0">
+                              <p
+                                className={`font-medium leading-snug ${
+                                  task.completed
+                                    ? 'line-through text-slate-400 dark:text-slate-500'
+                                    : 'text-slate-900 dark:text-white'
+                                }`}
+                              >
+                                {task.title}
+                              </p>
+                              <p className="mt-0.5 text-xs text-slate-500 dark:text-slate-400">
+                                {task.category} · {task.priority} priority
+                              </p>
+                            </div>
+                          </button>
                         </li>
                       ))}
                     </ul>

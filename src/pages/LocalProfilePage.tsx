@@ -54,21 +54,21 @@ export default function LocalProfilePage() {
             Local User Profile
           </h1>
           <p className="mt-1 text-sm text-slate-600 dark:text-slate-400">
-            Personalize your local workspace defaults for the Resume Builder and Cover Letter Studio.
+            Personalize your local workspace defaults for resume analysis and job targeting tools.
           </p>
         </div>
 
         <div className="rounded-xl border border-indigo-200/80 dark:border-indigo-900/60 bg-indigo-50/60 dark:bg-[#0D1529] p-4 flex items-start gap-3">
           <Info className="h-4 w-4 text-indigo-600 dark:text-indigo-400 shrink-0 mt-0.5" />
           <p className="text-xs leading-relaxed text-slate-700 dark:text-slate-300">
-            <strong>Local-Only Workspace Notice:</strong> ResumeIQ X does not use remote servers or cloud accounts. Your profile preferences and local sign-in credentials stay strictly inside this browser&apos;s IndexedDB.
+            <strong>Local-Only Workspace Notice:</strong> ResumeIQ does not use remote servers or cloud accounts. Your profile preferences and local sign-in credentials stay in this browser&apos;s IndexedDB, are device and browser dependent, and do not synchronize automatically between devices.
           </p>
         </div>
 
         <Card>
           <CardHeader
             title="Candidate Profile &amp; Career Preferences"
-            subtitle="Used to pre-fill headers when starting a new resume draft or cover letter"
+            subtitle="Store your candidate preferences locally in browser IndexedDB"
             action={
               <span className="inline-flex items-center gap-1.5 text-xs font-medium text-indigo-600 dark:text-indigo-400">
                 <UserCheck className="h-4 w-4" />
@@ -141,7 +141,7 @@ export default function LocalProfilePage() {
                   type="email"
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
-                  placeholder="you@example.com"
+                  placeholder="Enter contact email"
                   className={INPUT_CLASS}
                 />
               </div>
